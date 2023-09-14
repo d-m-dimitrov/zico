@@ -135,7 +135,20 @@
                 $('#remainingDelayText').text(remainingDelay.toFixed(0));
             }
 
+            // Function to calculate Remaining Delay based on input values
+            function calculateRemainingDelayFromInput() {
+                const dt1 = parseFloat($('#dt1').val()) || 0;
+                const dt2 = parseFloat($('#dt2').val()) || 0;
+                const dt3 = parseFloat($('#dt3').val()) || 0;
+                const dt4 = parseFloat($('#dt4').val()) || 0;
+                const rotation1Delay = parseFloat($('#rotation1Delay').text()) || 0;
 
+                const remainingDelay = dt1 + dt2 + dt3 + dt4 + rotation1Delay;
+                $('#remainingDelayText').text(remainingDelay.toFixed(0));
+            }
+
+            // Update Remaining Delay when any of the input values change
+            $('#dt1, #dt2, #dt3, #dt4').on('input', calculateRemainingDelayFromInput);
 
             // Update ETD when ATA or Min Ground Time changes
             $('#ataDateTime, #minGroundTime').on('input', calculateETD);
