@@ -16,20 +16,28 @@
                     <input type="number" class="form-control" id="minGroundTime" placeholder="Enter min ground time">
                 </div>
                 <div class="form-group">
-                    <label for="stdDateTime">STD (Date and Time):</label>
-                    <input type="datetime-local" class="form-control" id="stdDateTime">
+                    <label for="staTime">STA:</label>
+                    <input type="time" class="form-control" id="staTime">
                 </div>
                 <div class="form-group">
-                    <label for="ataDateTime">ATA (Date and Time):</label>
-                    <input type="datetime-local" class="form-control" id="ataDateTime">
+                    <label for="ataTime">ATA:</label>
+                    <input type="time" class="form-control" id="ataTime">
+                </div>
+                <div class="form-group">
+                    <label for="stdTime">STD:</label>
+                    <input type="time" class="form-control" id="stdTime">
                 </div>
                 <div class="form-group">
                     <label for="etdText">ETD:</label>
                     <p id="etdText" class="font-weight-bold"></p>
                 </div>
                 <div class="form-group">
-                    <label for="atdDateTime">ATD (Date and Time):</label>
-                    <input type="datetime-local" class="form-control" id="atdDateTime">
+                    <label for="cgotText">CGOT:</label>
+                    <p id="cgotText" class="font-weight-bold"></p>
+                </div>
+                <div class="form-group">
+                    <label for="atdTime">ATD:</label>
+                    <input type="time" class="form-control" id="atdTime">
                 </div>
                 <div class="form-group">
                     <label for="totalDelayText">Total Delay (minutes):</label>
@@ -42,37 +50,37 @@
             </div>
             <div class="col-md-6">
                 <div class="table-responsive">
-                <table class="table ">
-                    <thead>
-                        <tr>
-                            <th >Rotation</th>
-                            <th>93/RA</th>
-                            <th id="rotation1Delay"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td >Delay 1</td>
-                            <td><input type="text" name="dc1" id="dc1"></td>
-                            <td ><input type="number" name="dt1" id="dt1"></td>
-                        </tr>                        
-                        <tr>
-                            <td >Delay 2</td>
-                            <td><input type="text" name="dc2" id="dc2"></td>
-                            <td ><input type="number" name="dt2" id="dt2"></td>
-                        </tr>
-                        <tr>
-                            <td c>Delay 3</td>
-                            <td><input type="text" name="dc3" id="dc3"></td>
-                            <td ><input type="number" name="dt3" id="dt3"></td>
-                        </tr>
-                        <tr>
-                            <td >Delay 4</td>
-                            <td><input type="text" name="dc4" id="dc4"></td>
-                            <td ><input type="number" name="dt4" id="dt4"></td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Rotation</th>
+                                <th>93/RA</th>
+                                <th id="rotation1Delay"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Delay 1</td>
+                                <td><input type="text" name="dc1" id="dc1"></td>
+                                <td><input type="number" name="dt1" id="dt1"></td>
+                            </tr>                        
+                            <tr>
+                                <td>Delay 2</td>
+                                <td><input type="text" name="dc2" id="dc2"></td>
+                                <td><input type="number" name="dt2" id="dt2"></td>
+                            </tr>
+                            <tr>
+                                <td>Delay 3</td>
+                                <td><input type="text" name="dc3" id="dc3"></td>
+                                <td><input type="number" name="dt3" id="dt3"></td>
+                            </tr>
+                            <tr>
+                                <td>Delay 4</td>
+                                <td><input type="text" name="dc4" id="dc4"></td>
+                                <td><input type="number" name="dt4" id="dt4"></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -87,32 +95,64 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Function to calculate ETD based on ATA and Minimum Ground Time
-            function calculateETD() {
-                const ataDateTime = new Date($('#ataDateTime').val());
+            // Function to calculate ETD and CGOT based on ATA and Minimum Ground Time
+            function calculateETDAndCGOT() {
+                const ataTime = $('#ataTime').val();
+                const stdTime = $('#stdTime').val();
                 const minGroundTime = parseInt($('#minGroundTime').val()) || 0;
+
+                // Construct full date strings with a placeholder date (e.g., "1970-01-01")
+                const ataDateTimeStr = `1970-01-01T${ataTime}`;
+                const stdDateTimeStr = `1970-01-01T${stdTime}`;
+
+                const ataDateTime = new Date(ataDateTimeStr);
+                const stdDateTime = new Date(stdDateTimeStr);
+
                 const etdDateTime = new Date(ataDateTime.getTime() + minGroundTime * 60000); // Convert minutes to milliseconds
-                $('#etdText').text(etdDateTime.toLocaleString());
+                const cgotDateTime = new Date(etdDateTime.getTime() - 5 * 60000);
+
+                $('#etdText').text(etdDateTime.toLocaleTimeString());
+                $('#cgotText').text(cgotDateTime.toLocaleTimeString());
             }
 
             // Function to calculate Total Delay in minutes
             function calculateTotalDelay() {
-                const stdDateTime = new Date($('#stdDateTime').val());
-                const atdDateTime = new Date($('#atdDateTime').val());
+                const stdTime = $('#stdTime').val();
+                const atdTime = $('#atdTime').val();
+
+                const stdDateTimeStr = `1970-01-01T${stdTime}`;
+                const atdDateTimeStr = `1970-01-01T${atdTime}`;
+
+                const stdDateTime = new Date(stdDateTimeStr);
+                const atdDateTime = new Date(atdDateTimeStr);
+
+
+                const rotd = parseFloat($('#rotation1Delay').text()) || 0;
+                
+
                 const totalDelay = (atdDateTime - stdDateTime) / 60000; // Convert milliseconds to minutes
+                const remd = totalDelay-rotd
                 $('#totalDelayText').text(totalDelay.toFixed(0));
+                $('#remainingDelayText').text(remd.toFixed(0));
                 return totalDelay;
             }
 
-               // Function to update the table with ETD - STD in minutes
-            function updateTableETDMinusSTD() {
-                const stdDateTime = new Date($('#stdDateTime').val());
-                const ataDateTime = new Date($('#ataDateTime').val());
+            // Function to update the table with ETD - STD in minutes
+            function calculateRemainingDelay() {
+                const stdTime = $('#stdTime').val();
+                const ataTime = $('#ataTime').val();
+
+                const stdDateTimeStr = `1970-01-01T${stdTime}`;
+                const ataDateTimeStr = `1970-01-01T${ataTime}`;
+
+                const stdDateTime = new Date(stdDateTimeStr);
+                const ataDateTime = new Date(ataDateTimeStr);
+
                 const minGroundTime = parseInt($('#minGroundTime').val()) || 0;
                 const etdDateTime = new Date(ataDateTime.getTime() + minGroundTime * 60000);
 
                 
-                
+
                 if (!isNaN(stdDateTime) && !isNaN(etdDateTime)) {
                     const etdMinusSTD = (etdDateTime - stdDateTime) / 60000; // Convert milliseconds to minutes
                     $('#rotation1Delay').text(etdMinusSTD.toFixed(0));
@@ -120,61 +160,39 @@
                     $('#rotation1Delay').text('');
                 }
             }
-            // Function to calculate Remaining Delay
-            function calculateRemainingDelay() {
-                const totalDelay = calculateTotalDelay();
-                const rotation1Delay = parseFloat($('#rotation1Delay').text()) || 0;
 
-                const dt1 = parseFloat($('#dt1').val()) || 0;
-                const dt2 = parseFloat($('#dt2').val()) || 0;
-                const dt3 = parseFloat($('#dt3').val()) || 0;
-                const dt4 = parseFloat($('#dt4').val()) || 0;
+        // Function to calculate Remaining Delay based on input values
+        function calculateRemainingDelayFromInput() {
+            const totalDelay = calculateTotalDelay();
+            const dt1 = parseFloat($('#dt1').val()) || 0;
+            const dt2 = parseFloat($('#dt2').val()) || 0;
+            const dt3 = parseFloat($('#dt3').val()) || 0;
+            const dt4 = parseFloat($('#dt4').val()) || 0;
+            const rotation1Delay = parseFloat($('#rotation1Delay').text()) || 0;
 
-
-                const remainingDelay = totalDelay - rotation1Delay - dt1 - dt2 - dt3 - dt4;
-                $('#remainingDelayText').text(remainingDelay.toFixed(0));
-            }
-
-            // Function to calculate Remaining Delay based on input values
-            function calculateRemainingDelayFromInput() {
-                const dt1 = parseFloat($('#dt1').val()) || 0;
-                const dt2 = parseFloat($('#dt2').val()) || 0;
-                const dt3 = parseFloat($('#dt3').val()) || 0;
-                const dt4 = parseFloat($('#dt4').val()) || 0;
-                const rotation1Delay = parseFloat($('#rotation1Delay').text()) || 0;
-
-                const remainingDelay = dt1 + dt2 + dt3 + dt4 + rotation1Delay;
-                $('#remainingDelayText').text(remainingDelay.toFixed(0));
-            }
+            const remainingDelay = totalDelay - (dt1 + dt2 + dt3 + dt4 + rotation1Delay);
+            $('#remainingDelayText').text(remainingDelay.toFixed(0));
+}           
 
             // Update Remaining Delay when any of the input values change
             $('#dt1, #dt2, #dt3, #dt4').on('input', calculateRemainingDelayFromInput);
 
-            // Update ETD when ATA or Min Ground Time changes
-            $('#ataDateTime, #minGroundTime').on('input', calculateETD);
+            // Update ETD and CGOT when ATA or Min Ground Time changes
+            $('#ataTime, #minGroundTime').on('input', calculateETDAndCGOT);
 
             // Update Total Delay and Remaining Delay when ATD changes
-            $('#atdDateTime').on('input', calculateTotalDelay);
-            $('#atdDateTime').on('input', calculateRemainingDelay);
+            $('#atdTime').on('input', calculateTotalDelay);
+            $('#atdTime').on('input', calculateRemainingDelay);
 
-            // Update Remaining Delay when Rotation 1 Delay changes
-            $('#rotation1Delay').on('input', calculateRemainingDelay);
-
-               // Update the table when ATA, Min Ground Time, or STD changes
-            $('#ataDateTime, #minGroundTime, #stdDateTime').on('input', updateTableETDMinusSTD);
-                // Update Remaining Delay when any of the input values change
-            $('#dt1, #dt2, #dt3, #dt4').on('input', calculateRemainingDelayFromInput);
-
+            // Update the table when ATA, Min Ground Time, or STD changes
+            $('#ataTime, #minGroundTime, #stdTime').on('input', calculateRemainingDelay);
 
             // Initialize calculations
-            calculateETD();
-            updateTableETDMinusSTD();
+            calculateETDAndCGOT();
+            calculateRemainingDelay();
             calculateTotalDelay();
             calculateRemainingDelay();
-            
-            
         });
     </script>
-
 </body>
 </html>
