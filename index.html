@@ -7,7 +7,7 @@
     <title>Zico's Delay Calculator</title>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-6">
         <h1>Zico's Delay Calculator</h1>
         <div class="row">
             <div class="col-md-6">
@@ -32,8 +32,12 @@
                     <p id="etdText" class="font-weight-bold"></p>
                 </div>
                 <div class="form-group">
-                    <label for="cgotText">CGOT:</label>
+                    <label for="cgotText">Target Door Close Time:</label>
                     <p id="cgotText" class="font-weight-bold"></p>
+                </div>
+                <div class="form-group">
+                    <label for="rtgTime">RTG (Actual Door Close Time):</label>
+                    <input type="time" class="form-control" id="rtgTime">
                 </div>
                 <div class="form-group">
                     <label for="atdTime">ATD:</label>
@@ -45,16 +49,20 @@
                 </div>
                 <div class="form-group">
                     <label for="remainingDelayText">Remaining Delay (minutes):</label>
-                    <p id="remainingDelayText" class="text-danger font-weight-bold"></p>
+                    <p id="remainingDelayText" class="text-primary font-weight-bold"></p>
                 </div>
-            </div>
-            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="stationDelay">Station Delay (minutes):</label>
+                    <p id="stationDelay" class="text-danger font-weight-bold"></p>
+                </div>
+            
+            
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Rotation</th>
-                                <th>93/RA</th>
+                                <th>RA</th>
                                 <th id="rotation1Delay"></th>
                             </tr>
                         </thead>
@@ -137,6 +145,40 @@
                 return totalDelay;
             }
 
+            // 
+            function calculateStationDelay() {
+                const ataTime = $('#ataTime').val();
+                const stdTime = $('#stdTime').val();
+                const minGroundTime = parseInt($('#minGroundTime').val()) || 0;
+
+                // Construct full date strings with a placeholder date (e.g., "1970-01-01")
+                const ataDateTimeStr = `1970-01-01T${ataTime}`;
+                const stdDateTimeStr = `1970-01-01T${stdTime}`;
+
+                const ataDateTime = new Date(ataDateTimeStr);
+                const stdDateTime = new Date(stdDateTimeStr);
+
+                const etdDateTime = new Date(ataDateTime.getTime() + minGroundTime * 60000); // Convert minutes to milliseconds
+                const cgotDateTime = new Date(etdDateTime.getTime() - 5 * 60000);
+
+                const rtgTime = $('#rtgTime').val();
+
+                const d2 = `1970-01-01T${rtgTime}`;
+
+                
+                const rtgDateTime = new Date(d2);
+
+
+                const stationDelay = (rtgDateTime - cgotDateTime) / 60000; // Convert milliseconds to minutes
+                
+                $('#stationDelay').text(stationDelay.toFixed(0));
+                
+                return stationDelay;
+            }
+
+
+
+
             // Function to update the table with ETD - STD in minutes
             function calculateRemainingDelay() {
                 const stdTime = $('#stdTime').val();
@@ -183,6 +225,9 @@
             // Update Total Delay and Remaining Delay when ATD changes
             $('#atdTime').on('input', calculateTotalDelay);
             $('#atdTime').on('input', calculateRemainingDelay);
+            $('#atdTime').on('input',calculateStationDelay)
+
+            $('#rtgTime').on('input',calculateStationDelay)
 
             // Update the table when ATA, Min Ground Time, or STD changes
             $('#ataTime, #minGroundTime, #stdTime').on('input', calculateRemainingDelay);
@@ -192,6 +237,7 @@
             calculateRemainingDelay();
             calculateTotalDelay();
             calculateRemainingDelay();
+            calculateStationDelay();
         });
     </script>
 </body>
