@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Zico's Delay Calculator</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Zico's Delay Calculator</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="minGroundTime">Minimum Ground Time (minutes):</label>
+                    <input type="number" class="form-control" id="minGroundTime" placeholder="Enter min ground time">
+                </div>
+                <div class="form-group">
+                    <label for="stdDateTime">STD (Date and Time):</label>
+                    <input type="datetime-local" class="form-control" id="stdDateTime">
+                </div>
+                <div class="form-group">
+                    <label for="ataDateTime">ATA (Date and Time):</label>
+                    <input type="datetime-local" class="form-control" id="ataDateTime">
+                </div>
+                <div class="form-group">
+                    <label for="etdText">ETD:</label>
+                    <p id="etdText" class="font-weight-bold"></p>
+                </div>
+                <div class="form-group">
+                    <label for="atdDateTime">ATD (Date and Time):</label>
+                    <input type="datetime-local" class="form-control" id="atdDateTime">
+                </div>
+                <div class="form-group">
+                    <label for="totalDelayText">Total Delay (minutes):</label>
+                    <p id="totalDelayText" class="font-weight-bold"></p>
+                </div>
+                <div class="form-group">
+                    <label for="remainingDelayText">Remaining Delay (minutes):</label>
+                    <p id="remainingDelayText" class="text-danger font-weight-bold"></p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="table-responsive">
+                <table class="table ">
+                    <thead>
+                        <tr>
+                            <th >Rotation</th>
+                            <th>93/RA</th>
+                            <th id="rotation1Delay"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td >Delay 1</td>
+                            <td><input type="text" name="dc1" id="dc1"></td>
+                            <td ><input type="number" name="dt1" id="dt1"></td>
+                        </tr>                        
+                        <tr>
+                            <td >Delay 2</td>
+                            <td><input type="text" name="dc2" id="dc2"></td>
+                            <td ><input type="number" name="dt2" id="dt2"></td>
+                        </tr>
+                        <tr>
+                            <td c>Delay 3</td>
+                            <td><input type="text" name="dc3" id="dc3"></td>
+                            <td ><input type="number" name="dt3" id="dt3"></td>
+                        </tr>
+                        <tr>
+                            <td >Delay 4</td>
+                            <td><input type="text" name="dc4" id="dc4"></td>
+                            <td ><input type="number" name="dt4" id="dt4"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer bg-dark text-white text-center py-3">
+        <div class="container">
+            <p>&copy; 2023 Zico's Delay Calculator. Powered by DoubleD</p>
+        </div>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Function to calculate ETD based on ATA and Minimum Ground Time
+            function calculateETD() {
+                const ataDateTime = new Date($('#ataDateTime').val());
+                const minGroundTime = parseInt($('#minGroundTime').val()) || 0;
+                const etdDateTime = new Date(ataDateTime.getTime() + minGroundTime * 60000); // Convert minutes to milliseconds
+                $('#etdText').text(etdDateTime.toLocaleString());
+            }
+
+            // Function to calculate Total Delay in minutes
+            function calculateTotalDelay() {
+                const stdDateTime = new Date($('#stdDateTime').val());
+                const atdDateTime = new Date($('#atdDateTime').val());
+                const totalDelay = (atdDateTime - stdDateTime) / 60000; // Convert milliseconds to minutes
+                $('#totalDelayText').text(totalDelay.toFixed(0));
+                return totalDelay;
+            }
+
+               // Function to update the table with ETD - STD in minutes
+            function updateTableETDMinusSTD() {
+                const stdDateTime = new Date($('#stdDateTime').val());
+                const ataDateTime = new Date($('#ataDateTime').val());
+                const minGroundTime = parseInt($('#minGroundTime').val()) || 0;
+                const etdDateTime = new Date(ataDateTime.getTime() + minGroundTime * 60000);
+
+                
+                
+                if (!isNaN(stdDateTime) && !isNaN(etdDateTime)) {
+                    const etdMinusSTD = (etdDateTime - stdDateTime) / 60000; // Convert milliseconds to minutes
+                    $('#rotation1Delay').text(etdMinusSTD.toFixed(0));
+                } else {
+                    $('#rotation1Delay').text('');
+                }
+            }
+            // Function to calculate Remaining Delay
+            function calculateRemainingDelay() {
+                const totalDelay = calculateTotalDelay();
+                const rotation1Delay = parseFloat($('#rotation1Delay').text()) || 0;
+
+                const dt1 = parseFloat($('#dt1').val()) || 0;
+                const dt2 = parseFloat($('#dt2').val()) || 0;
+                const dt3 = parseFloat($('#dt3').val()) || 0;
+                const dt4 = parseFloat($('#dt4').val()) || 0;
+
+
+                const remainingDelay = totalDelay - rotation1Delay - dt1 - dt2 - dt3 - dt4;
+                $('#remainingDelayText').text(remainingDelay.toFixed(0));
+            }
+
+
+
+            // Update ETD when ATA or Min Ground Time changes
+            $('#ataDateTime, #minGroundTime').on('input', calculateETD);
+
+            // Update Total Delay and Remaining Delay when ATD changes
+            $('#atdDateTime').on('input', calculateTotalDelay);
+            $('#atdDateTime').on('input', calculateRemainingDelay);
+
+            // Update Remaining Delay when Rotation 1 Delay changes
+            $('#rotation1Delay').on('input', calculateRemainingDelay);
+
+               // Update the table when ATA, Min Ground Time, or STD changes
+            $('#ataDateTime, #minGroundTime, #stdDateTime').on('input', updateTableETDMinusSTD);
+                // Update Remaining Delay when any of the input values change
+            $('#dt1, #dt2, #dt3, #dt4').on('input', calculateRemainingDelayFromInput);
+
+
+            // Initialize calculations
+            calculateETD();
+            updateTableETDMinusSTD();
+            calculateTotalDelay();
+            calculateRemainingDelay();
+            
+            
+        });
+    </script>
+
+</body>
+</html>
